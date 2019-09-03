@@ -3,7 +3,7 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
-    - BITRISE_STEP_VERSION: "0.0.2"
+    - BITRISE_STEP_VERSION: "0.1.0"
     - BITRISE_JIRA_USER_NAME: $BITRISE_JIRA_USER_NAME
     - BITRISE_JIRA_API_TOKEN: $BITRISE_JIRA_API_TOKEN
     - BITRISE_JIRA_BASE_URL: $BITRISE_JIRA_BASE_URL
@@ -14,11 +14,6 @@ app:
 workflows:
   test:
     steps:
-      - change-workdir:
-          title: Switch working dir to ./_tmp dir
-          inputs:
-            - path: ./_tmp
-            - is_create_path: true
       - path::./:
           title: Env Vars
           inputs:
