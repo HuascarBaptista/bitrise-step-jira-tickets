@@ -54,7 +54,7 @@ type Ticket struct {
 
 func (resp response) String() string {
 	respValue := map[bool]string{true: colorstring.Green("SUCCESS"), false: colorstring.Red("FAILED")}[resp.err == nil]
-	return fmt.Sprintf("Gettings tickets to - %s - : %s", respValue, resp.ticketNames, resp.ticketSummary)
+	return fmt.Sprintf("Gettings tickets to - %s - : %s : %s", respValue, resp.ticketNames, resp.ticketSummary)
 }
 
 // -------------------------------------
@@ -134,10 +134,12 @@ func (client *Client) getJiraTickets(jiraTicket Ticket, ch chan response) {
 	var ticketsSummary string = ""
 	for _, issue := range jiraTicketsResponseTwo.Issues {
 		ticketsName += issue.Key + "|"
-		ticketsSummary += removeAccents(issue.Fields.Summary[:26]) + "|"
+		ticketsSummary += removeAccents(issue.Fields.Summary[:23]) + "...|"
 	}
-	ticketsName = ticketsName[:len(ticketsName)-2]
-	ticketsSummary = ticketsSummary[:len(ticketsSummary)-2]
+	ticketsName = ticketsName[:len(ticketsName)-1]
+	ticketsSummary = ticketsSummary[:len(ticketsSummary)-1]
+	log.Warnf("TicketsName: %s", ticketsName)
+	log.Warnf("TicketsSummary: %s", ticketsSummary)
 
 	if err := tools.ExportEnvironmentWithEnvman("JIRA_TICKETS_SUMMARY", ticketsSummary); err != nil {
 		ch <- response{fmt.Errorf("failed to export JIRA_TICKETS_SUMMARY, error: %s", err), "", ""}
