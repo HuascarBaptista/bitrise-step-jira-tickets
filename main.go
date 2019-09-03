@@ -34,6 +34,7 @@ func main() {
 	if err := client.GetJiraTickets(jiraTicket); err != nil {
 		failf("Getting tickets failed with error: %s", err)
 	}
+	log.Infof("Finishin AllStep")
 	os.Exit(0)
 }
 

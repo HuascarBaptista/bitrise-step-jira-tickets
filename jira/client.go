@@ -75,10 +75,12 @@ func (client *Client) GetJiraTickets(jiraTicket Ticket) error {
 	var responses []response
 	for resp := range ch {
 		counter++
+		log.Infof("Printing results")
 		log.Printf(resp.String())
 		if resp.err != nil {
 			responses = append(responses, resp)
 		}
+		log.Infof("Finishin printing results")
 	}
 
 	if len(responses) > 0 {
@@ -91,6 +93,7 @@ func (client *Client) GetJiraTickets(jiraTicket Ticket) error {
 
 		fmt.Println()
 	}
+	log.Infof("Finishin GetJiraTickets")
 	return map[bool]error{true: fmt.Errorf("some tickets were failed to be posted at Jira")}[len(responses) > 0]
 }
 
