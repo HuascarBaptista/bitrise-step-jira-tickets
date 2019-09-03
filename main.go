@@ -33,9 +33,8 @@ func main() {
 	jiraTicket := jira.Ticket{Projects: cfg.Projects, Status: cfg.Status, Labels: cfg.Labels}
 	if err := client.GetJiraTickets(jiraTicket); err != nil {
 		failf("Getting tickets failed with error: %s", err)
-	} else {
-		os.Exit(0)
 	}
+	os.Exit(0)
 }
 
 func generateBase64APIToken(userName string, apiToken string) string {
