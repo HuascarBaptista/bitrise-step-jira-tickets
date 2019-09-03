@@ -130,9 +130,11 @@ func (client *Client) getJiraTickets(jiraTicket Ticket, ch chan response) {
 	for _, issue := range jiraTicketsResponseTwo.Issues {
 		ticketsName += issue.Key + "|"
 		ticketsSummary += issue.Fields.Summary + "|"
+		log.Infof("ticketsSummary " + ticketsSummary)
 	}
 	ticketsName = ticketsName[:len(ticketsName)-2]
 	ticketsSummary = ticketsSummary[:len(ticketsSummary)-2]
+	log.Infof("FInal ticketsSummary " + ticketsSummary)
 
 	if err := tools.ExportEnvironmentWithEnvman("BITRISE_TICKETS_NAME", ticketsName); err != nil {
 		ch <- response{fmt.Errorf("failed to export BITRISE_TICKETS_NAME, error: %s", err), ""}

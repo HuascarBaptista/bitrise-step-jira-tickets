@@ -119,7 +119,7 @@ outputs:
         Tickets name of Jira separated by |
   - BITRISE_TICKETS_SUMMARY:
       opts:
-        title: "Jira tickets name"
-        summary: Tickets name
+        title: "Jira tickets summary"
+        summary: Tickets Summary
         description: |
-          Tickets name of Jira separated by |
+          Tickets Summary of Jira separated by |
