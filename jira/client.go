@@ -37,8 +37,9 @@ type JiraTicketsResponse struct {
 }
 
 type response struct {
-	err         error
-	ticketNames string
+	err           error
+	ticketNames   string
+	ticketSummary string
 }
 
 type Ticket struct {
@@ -49,7 +50,7 @@ type Ticket struct {
 
 func (resp response) String() string {
 	respValue := map[bool]string{true: colorstring.Green("SUCCESS"), false: colorstring.Red("FAILED")}[resp.err == nil]
-	return fmt.Sprintf("Gettings tickets to - %s - : %s", respValue, resp.ticketNames)
+	return fmt.Sprintf("Gettings tickets to - %s - : %s", respValue, resp.ticketNames, resp.ticketSummary)
 }
 
 // -------------------------------------
@@ -102,18 +103,18 @@ func (client *Client) getJiraTickets(jiraTicket Ticket, ch chan response) {
 	urlEncoded := getUrlEncoded(jiraTicket)
 	requestURL, err := urlutil.Join(client.baseURL, apiEndPoint+urlEncoded)
 	if err != nil {
-		ch <- response{err, ""}
+		ch <- response{err, "", ""}
 		return
 	}
 	request, err := createRequest(http.MethodGet, requestURL, client.headers)
 	if err != nil {
-		ch <- response{err, ""}
+		ch <- response{err, "", ""}
 		return
 	}
 
 	requestBytes, err := httputil.DumpRequest(request, true)
 	if err != nil {
-		ch <- response{err, ""}
+		ch <- response{err, "", ""}
 		return
 	}
 	log.Debugf("Request: %v", string(requestBytes))
@@ -122,7 +123,7 @@ func (client *Client) getJiraTickets(jiraTicket Ticket, ch chan response) {
 	jiraTicketsResponseTwo := JiraTicketsResponse{}
 	jsonResponse, body, err := client.performRequest(request, JiraTicketsResponse{})
 	if err := mapstructure.Decode(jsonResponse, &jiraTicketsResponseTwo); err != nil {
-		ch <- response{err, ""}
+		ch <- response{err, "", ""}
 	}
 	log.Debugf("Body: %s", string(body))
 	var ticketsName string = ""
@@ -130,23 +131,21 @@ func (client *Client) getJiraTickets(jiraTicket Ticket, ch chan response) {
 	for _, issue := range jiraTicketsResponseTwo.Issues {
 		ticketsName += issue.Key + "|"
 		ticketsSummary += issue.Fields.Summary + "|"
-		log.Infof("ticketsSummary " + ticketsSummary)
 	}
 	ticketsName = ticketsName[:len(ticketsName)-2]
 	ticketsSummary = ticketsSummary[:len(ticketsSummary)-2]
-	log.Infof("FInal ticketsSummary " + ticketsSummary)
 
 	if err := tools.ExportEnvironmentWithEnvman("BITRISE_TICKETS_NAME", ticketsName); err != nil {
-		ch <- response{fmt.Errorf("failed to export BITRISE_TICKETS_NAME, error: %s", err), ""}
+		ch <- response{fmt.Errorf("failed to export BITRISE_TICKETS_NAME, error: %s", err), "", ""}
 		return
 	}
 
 	if err := tools.ExportEnvironmentWithEnvman("BITRISE_TICKETS_SUMMARY", ticketsSummary); err != nil {
-		ch <- response{fmt.Errorf("failed to export BITRISE_TICKETS_SUMMARY, error: %s", err), ""}
+		ch <- response{fmt.Errorf("failed to export BITRISE_TICKETS_SUMMARY, error: %s", err), "", ""}
 		return
 	}
 
-	ch <- response{err, ticketsName}
+	ch <- response{err, ticketsName, ticketsSummary}
 }
 
 func createRequest(requestMethod string, url string, headers map[string]string) (*http.Request, error) {
