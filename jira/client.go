@@ -13,6 +13,10 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"strings"
+	"unicode"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
+	"golang.org/x/text/runes"
 )
 
 const (
@@ -130,21 +134,20 @@ func (client *Client) getJiraTickets(jiraTicket Ticket, ch chan response) {
 	var ticketsSummary string = ""
 	for _, issue := range jiraTicketsResponseTwo.Issues {
 		ticketsName += issue.Key + "|"
-		ticketsSummary += issue.Fields.Summary + "|"
+		ticketsSummary += removeAccents(issue.Fields.Summary[:26]) + "|"
 	}
 	ticketsName = ticketsName[:len(ticketsName)-2]
 	ticketsSummary = ticketsSummary[:len(ticketsSummary)-2]
 
-	if err := tools.ExportEnvironmentWithEnvman("BITRISE_TICKETS_NAME", ticketsName); err != nil {
-		ch <- response{fmt.Errorf("failed to export BITRISE_TICKETS_NAME, error: %s", err), "", ""}
+	if err := tools.ExportEnvironmentWithEnvman("JIRA_TICKETS_SUMMARY", ticketsSummary); err != nil {
+		ch <- response{fmt.Errorf("failed to export JIRA_TICKETS_SUMMARY, error: %s", err), "", ""}
 		return
 	}
 
-	if err := tools.ExportEnvironmentWithEnvman("BITRISE_TICKETS_SUMMARY", ticketsSummary); err != nil {
-		ch <- response{fmt.Errorf("failed to export BITRISE_TICKETS_SUMMARY, error: %s", err), "", ""}
+	if err := tools.ExportEnvironmentWithEnvman("JIRA_TICKETS_NAME", ticketsName); err != nil {
+		ch <- response{fmt.Errorf("failed to export JIRA_TICKETS_NAME, error: %s", err), "", ""}
 		return
 	}
-
 	ch <- response{err, ticketsName, ticketsSummary}
 }
 
@@ -156,6 +159,15 @@ func createRequest(requestMethod string, url string, headers map[string]string) 
 	}
 	addHeaders(req, headers)
 	return req, nil
+}
+
+func removeAccents(s string) string  {
+	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
+	output, _, e := transform.String(t, s)
+	if e != nil {
+		panic(e)
+	}
+	return output
 }
 
 func (client *Client) performRequest(req *http.Request, requestResponse interface{}) (interface{}, []byte, error) {

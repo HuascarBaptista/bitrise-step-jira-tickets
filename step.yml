@@ -111,13 +111,13 @@ inputs:
       is_sensitive: true
 
 outputs:
-  - BITRISE_TICKETS_NAME:
+  - JIRA_TICKETS_NAME:
     opts:
       title: "Jira tickets name"
       summary: Tickets name
       description: |
         Tickets name of Jira separated by |
-  - BITRISE_TICKETS_SUMMARY:
+  - JIRA_TICKETS_SUMMARY:
       opts:
         title: "Jira tickets summary"
         summary: Tickets Summary
