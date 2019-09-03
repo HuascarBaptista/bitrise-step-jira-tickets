@@ -8,15 +8,15 @@ import (
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/urlutil"
 	"github.com/mitchellh/mapstructure"
+	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
 	"unicode"
-	"golang.org/x/text/transform"
-	"golang.org/x/text/unicode/norm"
-	"golang.org/x/text/runes"
 )
 
 const (
@@ -106,6 +106,7 @@ func (client *Client) GetJiraTickets(jiraTicket Ticket) error {
 func (client *Client) getJiraTickets(jiraTicket Ticket, ch chan response) {
 	urlEncoded := getUrlEncoded(jiraTicket)
 	requestURL, err := urlutil.Join(client.baseURL, apiEndPoint+urlEncoded)
+	log.Infof("URL to retrieve Jira Tickets: %s", requestURL)
 	if err != nil {
 		ch <- response{err, "", ""}
 		return
@@ -134,19 +135,17 @@ func (client *Client) getJiraTickets(jiraTicket Ticket, ch chan response) {
 	var ticketsSummary string = ""
 	for _, issue := range jiraTicketsResponseTwo.Issues {
 		ticketsName += issue.Key + "|"
-		ticketsSummary += removeAccents(issue.Fields.Summary[:27]) + "...|"
+		ticketsSummary += removeAccents(issue.Fields.Summary[:30]) + "...|"
 	}
 	ticketsName = ticketsName[:len(ticketsName)-1]
 	ticketsSummary = ticketsSummary[:len(ticketsSummary)-1]
-	log.Warnf("TicketsName: %s", ticketsName)
-	log.Warnf("TicketsSummary: %s", ticketsSummary)
 
-	if err := tools.ExportEnvironmentWithEnvman("JIRA_TICKETS_SUMMARY", ticketsSummary); err != nil {
-		ch <- response{fmt.Errorf("failed to export JIRA_TICKETS_SUMMARY, error: %s", err), "", ""}
+	if err := tools.ExportEnvironmentWithEnvman("JIRA_TICKETS_DESCRIPTION", ticketsSummary); err != nil {
+		ch <- response{fmt.Errorf("failed to export JIRA_TICKETS_DESCRIPTION, error: %s", err), "", ""}
 		return
 	}
 
-	if err := tools.ExportEnvironmentWithEnvman("JIRA_TICKETS_NAME", ticketsSummary); err != nil {
+	if err := tools.ExportEnvironmentWithEnvman("JIRA_TICKETS_NAME", ticketsName); err != nil {
 		ch <- response{fmt.Errorf("failed to export JIRA_TICKETS_NAME, error: %s", err), "", ""}
 		return
 	}
@@ -164,7 +163,7 @@ func createRequest(requestMethod string, url string, headers map[string]string) 
 	return req, nil
 }
 
-func removeAccents(s string) string  {
+func removeAccents(s string) string {
 	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
 	output, _, e := transform.String(t, s)
 	if e != nil {

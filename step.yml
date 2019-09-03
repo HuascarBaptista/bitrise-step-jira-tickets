@@ -109,17 +109,14 @@ inputs:
       is_required: true
       is_expand: true
       is_sensitive: true
-
 outputs:
   - JIRA_TICKETS_NAME:
     opts:
-      title: "Jira tickets name"
-      summary: Tickets name
-      description: |
-        Tickets name of Jira separated by |
-  - JIRA_TICKETS_SUMMARY:
-      opts:
-        title: "Jira tickets summary"
-        summary: Tickets Summary
-        description: |
-          Tickets Summary of Jira separated by |
+      title: Jira tickets name
+      description: |-
+        Tickets name of Jira separated by `|`
+  - JIRA_TICKETS_DESCRIPTION:
+    opts:
+      title: Jira tickets description
+      description: |-
+        Tickets Description of Jira separated by `|`
