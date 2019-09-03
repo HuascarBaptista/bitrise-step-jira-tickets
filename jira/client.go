@@ -132,16 +132,23 @@ func (client *Client) getJiraTickets(jiraTicket Ticket, ch chan response) {
 	}
 	log.Debugf("Body: %s", string(body))
 	var ticketsName string = ""
-	var ticketsSummary string = ""
+	var ticketsSlack string = ""
+	var ticketsHyperLinkSlack string = ""
 	for _, issue := range jiraTicketsResponseTwo.Issues {
 		ticketsName += issue.Key + "|"
-		ticketsSummary += removeAccents(issue.Fields.Summary[:30]) + "...|"
+		description := issue.Fields.Summary[:30] + "..."
+		ticketsSlack += "*" + issue.Key + ":* " + description + "\n"
+		ticketsHyperLinkSlack += "<" + client.baseURL + "/" + issue.Key + "|" + issue.Key+">: "+ description + "\n"
 	}
 	ticketsName = ticketsName[:len(ticketsName)-1]
-	ticketsSummary = ticketsSummary[:len(ticketsSummary)-1]
 
-	if err := tools.ExportEnvironmentWithEnvman("JIRA_TICKETS_DESCRIPTION", ticketsSummary); err != nil {
+	if err := tools.ExportEnvironmentWithEnvman("JIRA_TICKETS_DESCRIPTION", ticketsSlack); err != nil {
 		ch <- response{fmt.Errorf("failed to export JIRA_TICKETS_DESCRIPTION, error: %s", err), "", ""}
+		return
+	}
+
+	if err := tools.ExportEnvironmentWithEnvman("JIRA_TICKETS_SLACK", ticketsHyperLinkSlack); err != nil {
+		ch <- response{fmt.Errorf("failed to export JIRA_TICKETS_SLACK, error: %s", err), "", ""}
 		return
 	}
 
@@ -150,7 +157,7 @@ func (client *Client) getJiraTickets(jiraTicket Ticket, ch chan response) {
 		return
 	}
 
-	ch <- response{err, ticketsName, ticketsSummary}
+	ch <- response{err, ticketsName, ticketsSlack}
 }
 
 func createRequest(requestMethod string, url string, headers map[string]string) (*http.Request, error) {

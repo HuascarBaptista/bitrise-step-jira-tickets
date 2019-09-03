@@ -120,3 +120,8 @@ outputs:
       title: Jira tickets description
       description: |-
         Tickets Description of Jira separated by `|`
+  - JIRA_TICKETS_SLACK:
+    opts:
+      title: Jira tickets slack
+      description: |-
+        Tickets Slack of Jira separated by `|`
