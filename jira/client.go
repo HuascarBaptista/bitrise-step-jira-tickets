@@ -81,6 +81,7 @@ func (client *Client) GetJiraTickets(jiraTicket Ticket) error {
 			responses = append(responses, resp)
 		}
 		log.Infof("Finishin printing results")
+		break
 	}
 
 	if len(responses) > 0 {
