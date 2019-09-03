@@ -138,7 +138,7 @@ func (client *Client) getJiraTickets(jiraTicket Ticket, ch chan response) {
 		ticketsName += issue.Key + "|"
 		description := issue.Fields.Summary[:30] + "..."
 		ticketsSlack += "*" + issue.Key + ":* " + description + "\n"
-		ticketsHyperLinkSlack += "<" + client.baseURL + "/" + issue.Key + "|" + issue.Key+">: "+ description + "\n"
+		ticketsHyperLinkSlack += "<" + client.baseURL + "/browse/" + issue.Key + "|" + issue.Key+">: "+ description + "\n"
 	}
 	ticketsName = ticketsName[:len(ticketsName)-1]
 
