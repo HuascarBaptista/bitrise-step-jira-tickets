@@ -14,13 +14,10 @@ type Config struct {
 	UserName string `env:"user_name,required"`
 	APIToken string `env:"api_token,required"`
 	BaseURL  string `env:"base_url,required"`
-	IsueKeys string `env:"issue_keys,required"`
-	Message  string `env:"build_message,required"`
 	Projects string `env:"projects,required"`
 	Status   string `env:"status,required"`
 	Labels   string `env:"labels,required"`
 }
-
 
 func main() {
 	var cfg Config

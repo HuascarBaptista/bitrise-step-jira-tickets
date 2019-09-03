@@ -20,7 +20,7 @@ workflows:
             - path: ./_tmp
             - is_create_path: true
       - path::./:
-          title: Step Test
+          title: Env Vars
           inputs:
             - user_name: ${BITRISE_JIRA_USER_NAME}
             - api_token: ${BITRISE_JIRA_API_TOKEN}
