@@ -134,7 +134,7 @@ func (client *Client) getJiraTickets(jiraTicket Ticket, ch chan response) {
 	var ticketsSummary string = ""
 	for _, issue := range jiraTicketsResponseTwo.Issues {
 		ticketsName += issue.Key + "|"
-		ticketsSummary += removeAccents(issue.Fields.Summary[:23]) + "...|"
+		ticketsSummary += removeAccents(issue.Fields.Summary[:27]) + "...|"
 	}
 	ticketsName = ticketsName[:len(ticketsName)-1]
 	ticketsSummary = ticketsSummary[:len(ticketsSummary)-1]
@@ -146,10 +146,11 @@ func (client *Client) getJiraTickets(jiraTicket Ticket, ch chan response) {
 		return
 	}
 
-	if err := tools.ExportEnvironmentWithEnvman("JIRA_TICKETS_NAME", ticketsName); err != nil {
+	if err := tools.ExportEnvironmentWithEnvman("JIRA_TICKETS_NAME", ticketsSummary); err != nil {
 		ch <- response{fmt.Errorf("failed to export JIRA_TICKETS_NAME, error: %s", err), "", ""}
 		return
 	}
+
 	ch <- response{err, ticketsName, ticketsSummary}
 }
 
