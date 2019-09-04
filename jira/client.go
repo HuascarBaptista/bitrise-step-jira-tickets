@@ -138,9 +138,11 @@ func (client *Client) getJiraTickets(jiraTicket Ticket, ch chan response) {
 		ticketsName += issue.Key + "|"
 		description := issue.Fields.Summary
 		ticketsSlack += "*" + issue.Key + ":* " + description + "\n"
-		ticketsHyperLinkSlack += "<" + client.baseURL + "/browse/" + issue.Key + "|" + issue.Key+">: "+ description + "\n"
+		ticketsHyperLinkSlack += "<" + client.baseURL + "/browse/" + issue.Key + "|" + issue.Key + ">: " + description + "\n"
 	}
-	ticketsName = ticketsName[:len(ticketsName)-1]
+	if (len(ticketsName) > 0) {
+		ticketsName = ticketsName[:len(ticketsName)-1]
+	}
 
 	if err := tools.ExportEnvironmentWithEnvman("JIRA_TICKETS_DESCRIPTION", ticketsSlack); err != nil {
 		ch <- response{fmt.Errorf("failed to export JIRA_TICKETS_DESCRIPTION, error: %s", err), "", ""}
