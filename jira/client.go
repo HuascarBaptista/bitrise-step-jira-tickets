@@ -136,7 +136,7 @@ func (client *Client) getJiraTickets(jiraTicket Ticket, ch chan response) {
 	var ticketsHyperLinkSlack string = ""
 	for _, issue := range jiraTicketsResponseTwo.Issues {
 		ticketsName += issue.Key + "|"
-		description := issue.Fields.Summary[:30] + "..."
+		description := issue.Fields.Summary
 		ticketsSlack += "*" + issue.Key + ":* " + description + "\n"
 		ticketsHyperLinkSlack += "<" + client.baseURL + "/browse/" + issue.Key + "|" + issue.Key+">: "+ description + "\n"
 	}
