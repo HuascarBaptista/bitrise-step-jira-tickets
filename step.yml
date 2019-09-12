@@ -102,14 +102,14 @@ inputs:
       is_required: true
 
   - allow_empty_version:
-      opts:
-        title: The fix version is required
-        summary: The fix version is required
-        description: The fix version is required
-        is_required: true
-        value_options:
-          - true
-          - false
+    opts:
+      title: The fix version is required
+      summary: The fix version is required
+      description: The fix version is required
+      is_required: true
+      value_options:
+        - true
+        - false
   - fix_version:
     opts:
       title: Jira fix version to find -`5.36` (could be empty if you set it as isn't required)
