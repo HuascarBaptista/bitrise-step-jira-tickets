@@ -101,7 +101,7 @@ inputs:
       description: Jira labels keys separated with `|` as Android|iOS
       is_required: true
 
-  - allow_empty_version:
+  - allow_empty_version: true
     opts:
       title: The fix version is required
       summary: The fix version is required
