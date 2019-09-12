@@ -103,18 +103,18 @@ inputs:
 
   - allow_empty_version: true
     opts:
-      title: The fix version is required
-      summary: The fix version is required
-      description: The fix version is required
+      title: The fix version could be empty
+      summary: The fix version could be empty
+      description: The fix version could be empty
       is_required: true
       value_options:
         - true
         - false
   - fix_version:
     opts:
-      title: Jira fix version to find -`5.36` (could be empty if you set it as isn't required)
-      summary: Jira fix version to find - `5.36` (could be empty if you set it as isn't required)
-      description: Jira fix version to find - `5.36` (could be empty if you set it as isn't required)
+      title: Jira fix version to find (could be empty if you set true in the previuos entry)
+      summary: Jira fix version to find - `5.36`, `Android_5.36` (could be empty if you set it as isn't required)
+      description: Jira fix version to find - `5.36`, `Android_5.36` (could be empty if you set it as isn't required)
       is_required: false
 
   - base_url:
