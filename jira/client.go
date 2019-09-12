@@ -47,9 +47,11 @@ type response struct {
 }
 
 type Ticket struct {
-	Projects string
-	Status   string
-	Labels   string
+	Projects          string
+	Status            string
+	Labels            string
+	FixVersion        string
+	AllowEmptyVersion bool
 }
 
 func (resp response) String() string {
@@ -99,7 +101,6 @@ func (client *Client) GetJiraTickets(jiraTicket Ticket) error {
 
 		fmt.Println()
 	}
-	log.Infof("Finishin GetJiraTickets")
 	return map[bool]error{true: fmt.Errorf("some tickets were failed to be posted at Jira")}[len(responses) > 0]
 }
 
@@ -137,16 +138,10 @@ func (client *Client) getJiraTickets(jiraTicket Ticket, ch chan response) {
 	for _, issue := range jiraTicketsResponseTwo.Issues {
 		ticketsName += issue.Key + "|"
 		description := issue.Fields.Summary
-		ticketsSlack += "*" + issue.Key + ":* " + description + "\n"
 		ticketsHyperLinkSlack += "<" + client.baseURL + "/browse/" + issue.Key + "|" + issue.Key + ">: " + description + "\n"
 	}
 	if (len(ticketsName) > 0) {
 		ticketsName = ticketsName[:len(ticketsName)-1]
-	}
-
-	if err := tools.ExportEnvironmentWithEnvman("JIRA_TICKETS_DESCRIPTION", ticketsSlack); err != nil {
-		ch <- response{fmt.Errorf("failed to export JIRA_TICKETS_DESCRIPTION, error: %s", err), "", ""}
-		return
 	}
 
 	if err := tools.ExportEnvironmentWithEnvman("JIRA_TICKETS_SLACK", ticketsHyperLinkSlack); err != nil {
@@ -221,6 +216,7 @@ func getUrlEncoded(ticket Ticket) string {
 	projects := convertToJQLInSentence(ticket.Projects, stringToConcat)
 	labels := convertToJQLInSentence(ticket.Labels, stringToConcat)
 	status := convertToJQLInSentence(ticket.Status, stringToConcat)
+	fixVersion := getFixVersion(ticket.FixVersion, ticket.AllowEmptyVersion)
 	if projects != "" {
 		result += "project in (\"" + projects + ")"
 	}
@@ -229,6 +225,12 @@ func getUrlEncoded(ticket Ticket) string {
 			result += " and "
 		}
 		result += "status in (\"" + status + ")"
+	}
+	if fixVersion != "" {
+		if result != "" {
+			result += " and "
+		}
+		result += "fixVersion in " + fixVersion
 	}
 	if labels != "" {
 		if result != "" {
@@ -239,6 +241,16 @@ func getUrlEncoded(ticket Ticket) string {
 	result += " order by updated DESC"
 	t := &url.URL{Path: result}
 	return t.String()
+}
+
+func getFixVersion(fixVersion string, allowEmptyVersion bool) string {
+	if !strings.Contains(fixVersion, "Android_") {
+		fixVersion = "Android_" + fixVersion
+	}
+	if (allowEmptyVersion) {
+		fixVersion = "EMPTY," + "\"" + fixVersion + "\""
+	}
+	return "(" + fixVersion + ")"
 }
 
 func convertToJQLInSentence(valueToTransfor string, stringToConcat string) string {
