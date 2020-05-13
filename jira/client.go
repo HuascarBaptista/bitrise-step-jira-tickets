@@ -140,7 +140,7 @@ func (client *Client) getJiraTickets(jiraTicket Ticket, ch chan response) {
 		description := issue.Fields.Summary
 		ticketsHyperLinkSlack += "<" + client.baseURL + "/browse/" + issue.Key + "|" + issue.Key + ">: " + description + "\n"
 	}
-	if (len(ticketsName) > 0) {
+	if len(ticketsName) > 0 {
 		ticketsName = ticketsName[:len(ticketsName)-1]
 	}
 
@@ -244,12 +244,21 @@ func getUrlEncoded(ticket Ticket) string {
 }
 
 func getFixVersion(fixVersion string, allowEmptyVersion bool) string {
-	if !strings.Contains(fixVersion, "Android_") {
-		fixVersion = "Android_" + fixVersion
+
+	if fixVersion != "" {
+		if !strings.Contains(fixVersion, "Android_") {
+			fixVersion = "Android_" + fixVersion
+		}
+
+		if allowEmptyVersion {
+			fixVersion = "EMPTY," + "\"" + fixVersion + "\""
+		}
+	} else {
+		if allowEmptyVersion {
+			fixVersion = "EMPTY"
+		}
 	}
-	if (allowEmptyVersion) {
-		fixVersion = "EMPTY," + "\"" + fixVersion + "\""
-	}
+
 	return "(" + fixVersion + ")"
 }
 
