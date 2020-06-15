@@ -255,7 +255,7 @@ func getFixVersion(fixVersion string, allowEmptyVersion bool) string {
 		}
 	} else {
 		if allowEmptyVersion {
-			fixVersion = "EMPTY"
+			fixVersion = ""
 		}
 	}
 
