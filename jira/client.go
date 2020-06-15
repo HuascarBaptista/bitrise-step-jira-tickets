@@ -226,7 +226,7 @@ func getUrlEncoded(ticket Ticket) string {
 		}
 		result += "status in (\"" + status + ")"
 	}
-	if fixVersion != "" {
+	if fixVersion != "()" {
 		if result != "" {
 			result += " and "
 		}
@@ -255,7 +255,7 @@ func getFixVersion(fixVersion string, allowEmptyVersion bool) string {
 		}
 	} else {
 		if allowEmptyVersion {
-			fixVersion = "EMPTY"
+			fixVersion = ""
 		}
 	}
 
