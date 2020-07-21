@@ -47,12 +47,12 @@ type response struct {
 }
 
 type Ticket struct {
-	Projects          string
-	Status            string
-	Labels            string
-	FixVersion        string
-	AllowEmptyVersion bool
+	Projects string
+	Status   string
+	Platform string
 }
+
+var customPrivateFieldsForPlatform = []string{"cf[11722]", "cf[10200]", "cf[11251]", "cf[11075]"}
 
 func (resp response) String() string {
 	respValue := map[bool]string{true: colorstring.Green("SUCCESS"), false: colorstring.Red("FAILED")}[resp.err == nil]
@@ -105,7 +105,7 @@ func (client *Client) GetJiraTickets(jiraTicket Ticket) error {
 }
 
 func (client *Client) getJiraTickets(jiraTicket Ticket, ch chan response) {
-	urlEncoded := getUrlEncoded(jiraTicket)
+	urlEncoded := getJiraSearchUrlEncoded(jiraTicket)
 	requestURL, err := urlutil.Join(client.baseURL, apiEndPoint+urlEncoded)
 	log.Infof("URL to retrieve Jira Tickets: %s", requestURL)
 	if err != nil {
@@ -143,7 +143,7 @@ func (client *Client) getJiraTickets(jiraTicket Ticket, ch chan response) {
 	if len(ticketsName) > 0 {
 		ticketsName = ticketsName[:len(ticketsName)-1]
 	}
-
+	println(ticketsName)
 	if err := tools.ExportEnvironmentWithEnvman("JIRA_TICKETS_SLACK", ticketsHyperLinkSlack); err != nil {
 		ch <- response{fmt.Errorf("failed to export JIRA_TICKETS_SLACK, error: %s", err), "", ""}
 		return
@@ -210,56 +210,55 @@ func (client *Client) performRequest(req *http.Request, requestResponse interfac
 	return requestResponse, body, nil
 }
 
-func getUrlEncoded(ticket Ticket) string {
+func getJiraSearchUrlEncoded(ticket Ticket) string {
 	var result = ""
 	stringToConcat := "\",\""
 	projects := convertToJQLInSentence(ticket.Projects, stringToConcat)
-	labels := convertToJQLInSentence(ticket.Labels, stringToConcat)
 	status := convertToJQLInSentence(ticket.Status, stringToConcat)
-	fixVersion := getFixVersion(ticket.FixVersion, ticket.AllowEmptyVersion)
-	if projects != "" {
-		result += "project in (\"" + projects + ")"
+	result = concatProjects(projects, result)
+	result = concatStatus(status, result)
+	result = concatPlatform(ticket.Platform, result)
+	result += concatOrder()
+	t := &url.URL{Path: result}
+	return t.String()
+}
+
+func concatPlatform(platform string, result string) string {
+	if platform != "" {
+		if result != "" {
+			result += " and "
+		}
+		result += " ("
+		for i := range customPrivateFieldsForPlatform {
+			result += customPrivateFieldsForPlatform[i] + "=\"" + platform + "\""
+			if i != (len(customPrivateFieldsForPlatform) - 1) {
+				result += " or "
+			}
+		}
+		result += ")"
 	}
+	return result
+}
+
+func concatOrder() string {
+	return " order by updated DESC"
+}
+
+func concatStatus(status string, result string) string {
 	if status != "" {
 		if result != "" {
 			result += " and "
 		}
 		result += "status in (\"" + status + ")"
 	}
-	if fixVersion != "()" {
-		if result != "" {
-			result += " and "
-		}
-		result += "fixVersion in " + fixVersion
-	}
-	if labels != "" {
-		if result != "" {
-			result += " and "
-		}
-		result += "labels in (\"" + labels + ")"
-	}
-	result += " order by updated DESC"
-	t := &url.URL{Path: result}
-	return t.String()
+	return result
 }
 
-func getFixVersion(fixVersion string, allowEmptyVersion bool) string {
-
-	if fixVersion != "" {
-		if !strings.Contains(fixVersion, "Android_") {
-			fixVersion = "Android_" + fixVersion
-		}
-
-		if allowEmptyVersion {
-			fixVersion = "EMPTY," + "\"" + fixVersion + "\""
-		}
-	} else {
-		if allowEmptyVersion {
-			fixVersion = ""
-		}
+func concatProjects(projects string, result string) string {
+	if projects != "" {
+		result += "project in (\"" + projects + ")"
 	}
-
-	return "(" + fixVersion + ")"
+	return result
 }
 
 func convertToJQLInSentence(valueToTransfor string, stringToConcat string) string {

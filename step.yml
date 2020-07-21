@@ -79,6 +79,14 @@ inputs:
       is_required: true
       is_expand: true
       is_sensitive: true
+  - base_url:
+    opts:
+      title: Jira base URL.
+      summary: URL of the presonal Jira software.
+      description: URL of the presonal Jira software.
+      is_required: true
+      is_expand: true
+      is_sensitive: true
 
   - projects:
     opts:
@@ -93,38 +101,13 @@ inputs:
       summary: Jira status separated with `|`
       description: Jira status separated with `|` as In Develop|In Qa
       is_required: true
-
-  - labels:
+  - platform:
     opts:
-      title: Jira labels keys
-      summary: Jira labels keys separated with `|`
-      description: Jira labels keys separated with `|` as Android|iOS
-      is_required: true
-
-  - allow_empty_version: true
-    opts:
-      title: The fix version could be empty
-      summary: The fix version could be empty
-      description: The fix version could be empty
-      is_required: true
-      value_options:
-        - true
-        - false
-  - fix_version:
-    opts:
-      title: Jira fix version to find (could be empty if you set true in the previuos entry)
-      summary: Jira fix version to find - `5.36`, `Android_5.36` (could be empty if you set it as isn't required)
-      description: Jira fix version to find - `5.36`, `Android_5.36` (could be empty if you set it as isn't required)
+      title: Jira Platform
+      summary: Jira platform
+      description: Jira platform Android or IOS (default Android)
       is_required: false
 
-  - base_url:
-    opts:
-      title: Jira base URL.
-      summary: URL of the presonal Jira software.
-      description: URL of the presonal Jira software.
-      is_required: true
-      is_expand: true
-      is_sensitive: true
 outputs:
   - JIRA_TICKETS_NAME:
     opts:

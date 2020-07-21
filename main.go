@@ -7,19 +7,16 @@ import (
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-tools/go-steputils/stepconf"
 	"os"
-	"strconv"
 )
 
 // Config ...
 type Config struct {
-	UserName          string `env:"user_name,required"`
-	APIToken          string `env:"api_token,required"`
-	AllowEmptyVersion string `env:"allow_empty_version,required"`
-	FixVersion        string `env:"fix_version"`
-	BaseURL           string `env:"base_url,required"`
-	Projects          string `env:"projects,required"`
-	Status            string `env:"status,required"`
-	Labels            string `env:"labels,required"`
+	UserName string `env:"user_name,required"`
+	APIToken string `env:"api_token,required"`
+	BaseURL  string `env:"base_url,required"`
+	Projects string `env:"projects,required"`
+	Status   string `env:"status,required"`
+	Platform string `env:"platform"`
 }
 
 func main() {
@@ -27,20 +24,15 @@ func main() {
 	if err := stepconf.Parse(&cfg); err != nil {
 		failf("Issue with input: %s", err)
 	}
-
-	allowEmptyVersion, error := strconv.ParseBool(cfg.AllowEmptyVersion)
-	if error != nil {
-		failf("Allow empty version unset")
-	}
-	if !allowEmptyVersion && cfg.FixVersion == "" {
-		failf("Allow empty version set as false but Fix version is empty")
+	if len(cfg.Platform) <= 0 {
+		cfg.Platform = "Android"
 	}
 	stepconf.Print(cfg)
 	fmt.Println()
 
 	encodedToken := generateBase64APIToken(cfg.UserName, cfg.APIToken)
 	client := jira.NewClient(encodedToken, cfg.BaseURL)
-	jiraTicket := jira.Ticket{Projects: cfg.Projects, Status: cfg.Status, Labels: cfg.Labels, AllowEmptyVersion: allowEmptyVersion, FixVersion: cfg.FixVersion}
+	jiraTicket := jira.Ticket{Projects: cfg.Projects, Status: cfg.Status, Platform: cfg.Platform}
 	if err := client.GetJiraTickets(jiraTicket); err != nil {
 		failf("Getting tickets failed with error: %s", err)
 	}
