@@ -241,7 +241,7 @@ func concatPlatform(platform string, result string) string {
 }
 
 func concatOrder() string {
-	return " order by updated DESC"
+	return " order by project"
 }
 
 func concatStatus(status string, result string) string {
