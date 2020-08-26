@@ -218,9 +218,18 @@ func getJiraSearchUrlEncoded(ticket Ticket) string {
 	result = concatProjects(projects, result)
 	result = concatStatus(status, result)
 	result = concatPlatform(ticket.Platform, result)
+	result = concatMaxResult(result)
 	result += concatOrder()
 	t := &url.URL{Path: result}
 	return t.String()
+}
+
+func concatMaxResult(result string) string {
+	if result != "" {
+		result += " and "
+	}
+	result += "maxResults=1000 "
+	return result
 }
 
 func concatPlatform(platform string, result string) string {
